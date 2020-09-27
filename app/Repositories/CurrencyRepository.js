@@ -32,7 +32,6 @@ class CurrencyRepository {
         const currency = await this.findByValue(value) || new Currency();
 
         if (currency.value) {
-            currency.value = value;
             currency.quantity += parseInt(quantity);
             await currency.save();
             return currency;
@@ -44,6 +43,30 @@ class CurrencyRepository {
         await currency.save();
 
         return currency;
+    }
+
+    /**
+    * The method who set the quantity of the values in 0.
+    * @return {Void}
+    */
+
+    async updateAllQuantityInZero() {
+        await Currency
+            .query()
+            .update({ quantity: 0 })
+    }
+
+    /**
+    * The method who update the currency by the value.
+    * @param  {integer} value - the value of the coins or money
+    * @param  {integer} quantity - the quantity of the coins or money per value
+    * @return {Void}
+    */
+
+    async updateByValue(value, quantity) {
+        const currency = await this.findByValue(value);
+        currency.quantity = quantity
+        await currency.save();
     }
 }
 

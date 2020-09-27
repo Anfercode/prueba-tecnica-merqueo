@@ -33,6 +33,7 @@
     "@adonisjs/validator": "^5.0.6",
     "@adonisjs/vow": "^1.0.17",
     "http-status-codes": "^2.1.4",
+    "lodash": "^4.17.20",
     "pg": "^8.3.3"
   },
   "devDependencies": {},

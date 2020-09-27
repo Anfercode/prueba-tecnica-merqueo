@@ -1,10 +1,10 @@
 const { StatusCodes } = use('http-status-codes')
 
-class LoadCurrencyValidator {
+class PaymentValidator {
   get rules() {
     return {
-      value: 'required|integer|in:50,100,200,500,1000,5000,10000,20000,50000,100000',
-      quantity: 'required|integer|above:0'
+      bill: 'required|integer|above:0',
+      money: 'required|array'
     };
   }
 
@@ -12,7 +12,6 @@ class LoadCurrencyValidator {
     return {
       required: 'The {{field}} is required',
       integer: 'The {{field}} must be a integer',
-      in: 'The {{field}} not in 50, 100, 200, 500, 1000, 5000, 10000, 20000, 50000, 100000',
       adobe: 'The {{field}} cannot be less than 0'
     };
   }
@@ -26,4 +25,5 @@ class LoadCurrencyValidator {
   }
 }
 
-module.exports = LoadCurrencyValidator
+
+module.exports = PaymentValidator

@@ -15,8 +15,10 @@
 const Route = use('Route')
 
 Route.group(() => {
-    Route.post('/load-money', 'CurrencyController.loadMoney').validator(
-        'LoadCurrencyValidator'
-    );
-    Route.get('/money', 'CurrencyController.getAllMoney')
+
+    Route.get('/money', 'CurrencyController.getAllMoney');
+    Route.post('/load-money', 'CurrencyController.loadMoney').validator('LoadCurrencyValidator');
+    Route.put('/withdraw', 'CurrencyController.withDraw');
+    Route.post('/payment', 'CurrencyController.payment').validator('PaymentValidator');
+
 }).prefix('currency');
