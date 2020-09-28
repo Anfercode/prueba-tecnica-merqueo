@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "adonis serve --dev",
-    "test": "nyc node ace test",
+    "test": "adonis test",
     "lint": "./node_modules/.bin/eslint ./**.js --fix",
     "build": "adonis migration:refresh && adonis seed && npm run test",
     "cover": "npx nyc report --reporter=html && open coverage/index.html"

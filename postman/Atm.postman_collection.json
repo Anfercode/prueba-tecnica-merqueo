@@ -1,0 +1,134 @@
+{
+	"info": {
+		"_postman_id": "28958707-f1bd-4877-9d3b-b5d3044fe5a7",
+		"name": "Atm",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "money",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3333/currency/money",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3333",
+					"path": [
+						"currency",
+						"money"
+					]
+				},
+				"description": "Money in the ATM"
+			},
+			"response": []
+		},
+		{
+			"name": "load-money",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"value\": \"100000\",\n    \"quantity\": \"10\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3333/currency/load-money",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3333",
+					"path": [
+						"currency",
+						"load-money"
+					]
+				},
+				"description": "Load the base of money in the atm"
+			},
+			"response": []
+		},
+		{
+			"name": "withdraw",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "http://127.0.0.1:3333/currency/withdraw",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3333",
+					"path": [
+						"currency",
+						"withdraw"
+					]
+				},
+				"description": "This enpoints withdraw all the money in the atm"
+			},
+			"response": []
+		},
+		{
+			"name": "payment",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"bill\": 300150,\n    \"money\":[\n        {\n            \"value\": 100000,\n            \"quantity\": 3\n        },\n        {\n            \"value\": 50,\n            \"quantity\": 5\n        }\n    ] \n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://127.0.0.1:3333/currency/payment",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "3333",
+					"path": [
+						"currency",
+						"payment"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "logs",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
