@@ -13,7 +13,7 @@ class LoadCurrencyValidator {
       required: 'The {{field}} is required',
       integer: 'The {{field}} must be a integer',
       in: 'The {{field}} not in 50, 100, 200, 500, 1000, 5000, 10000, 20000, 50000, 100000',
-      adobe: 'The {{field}} cannot be less than 0'
+      adobe: 'The {{field}} cannot be less than 0',
     };
   }
 

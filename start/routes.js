@@ -21,4 +21,5 @@ Route.group(() => {
     Route.put('/withdraw', 'CurrencyController.withDraw');
     Route.post('/payment', 'CurrencyController.payment').validator('PaymentValidator');
 
+    Route.get('/log', 'CurrencyLogController.getCurrencyHistory')
 }).prefix('currency');

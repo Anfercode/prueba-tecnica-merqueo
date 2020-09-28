@@ -30,16 +30,8 @@ class CurrencyRepository {
 
     async createOrUpdateByValue(value, quantity) {
         const currency = await this.findByValue(value) || new Currency();
-
-        if (currency.value) {
-            currency.quantity += parseInt(quantity);
-            await currency.save();
-            return currency;
-        }
-
         currency.value = value;
         currency.quantity = quantity;
-
         await currency.save();
 
         return currency;

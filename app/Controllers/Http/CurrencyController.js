@@ -2,31 +2,57 @@ const { StatusCodes } = use('http-status-codes')
 const CurrencyRepository = require('../../Repositories/CurrencyRepository');
 const NotEnoughtMoneyToGiveChangeException = use('App/Exceptions/NotEnoughtMoneyToGiveChangeException')
 const BillGreaterThanMoneyException = use('App/Exceptions/BillGreaterThanMoneyException')
+const CurrencyLogController = require('./CurrencyLogController')
 const _ = use('lodash')
 
 class CurrencyController {
 
     constructor() {
         this.repository = new CurrencyRepository();
+        this.currencyLog = new CurrencyLogController();
     }
 
     /**
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @return {Void}
-   */
+    * The method to load the money to ATM
+    * @param {object} ctx
+    * @param {Request} ctx.request
+    * @param {Response} ctx.response
+    * @return {Void}
+    */
     async loadMoney({ request, response }) {
-        const { value, quantity } = request.post();
-        const currency = await this.repository.createOrUpdateByValue(value, quantity);
-        response.status(StatusCodes.CREATED).send({ "message": "Load successful", "info": currency })
+        try {
+            const { value, quantity } = request.post();
+            const allData = await this.repository.findAll();
+            const quantityTotal = await this.getQuantityTotal(value, quantity);
+            const currency = await this.repository.createOrUpdateByValue(value, quantityTotal);
+            this.currencyLog.createLog('load-money', JSON.stringify(request.post()), JSON.stringify(allData.rows));
+            response.status(StatusCodes.CREATED).send({ "message": "Load successful", "info": currency })
+        } catch (error) {
+            response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+        }
     }
 
     /**
-   * @param {object} ctx
-   * @param {Response} ctx.response
-   * @return {Void}
-   */
+    * The method to get the quantity if is a new currency or a exist currency
+    * @param {Integer} value - the value of the currency
+    * @param {Integer} quantity - the quantity of currency
+    * @return {Integer}
+    */
+    async getQuantityTotal(value, quantity){
+        const currency = await this.repository.findByValue(value);
+        if(currency){
+            return parseInt(quantity) + currency.quantity || 0;
+        }
+
+        return quantity
+    }
+
+    /**
+    * The method to get all currencies in ATM
+    * @param {object} ctx
+    * @param {Response} ctx.response
+    * @return {Void}
+    */
     getAllMoney({ response }) {
         try {
             return this.repository.findAll();
@@ -36,22 +62,29 @@ class CurrencyController {
     }
 
     /**
-   * @param {object} ctx
-   * @param {Response} ctx.response
-   * @return {Void}
-   */
-    withDraw({ response }) {
-        this.repository.updateAllQuantityInZero()
-        response.status(StatusCodes.OK).send({ "message": "you have withdraw all your money" })
+    * The method to withdraw all the money in the ATM
+    * @param {object} ctx
+    * @param {Response} ctx.response
+    * @return {Void}
+    */
+    async withDraw({ response }) {
+        try {
+            const allData = await this.repository.findAll();
+            await this.repository.updateAllQuantityInZero()
+            await this.currencyLog.createLog('withdraw', '{}', JSON.stringify(allData.rows));
+            response.status(StatusCodes.OK).send({ "message": "you have withdraw all your money" })
+        } catch (error) {
+            response.status(StatusCodes.INTERNAL_SERVER_ERROR).send(error);
+        }
     }
 
-
     /**
-   * @param {object} ctx
-   * @param {Request} ctx.request
-   * @param {Response} ctx.response
-   * @return {Void}
-   */
+    * The Method to make the payment in the ATM
+    * @param {object} ctx
+    * @param {Request} ctx.request
+    * @param {Response} ctx.response
+    * @return {Void}
+    */
     async payment({ request, response }) {
         const { bill, money } = request.post();
         const totalMoneyInCurrency = await this.repository.findAll();
@@ -74,23 +107,26 @@ class CurrencyController {
         }
 
         await this.currencyAdjustment(quantityChange, money);
+        await this.currencyLog.createLog('payment', JSON.stringify(request.post()), JSON.stringify(totalMoneyInCurrency.rows));
 
         response.status(StatusCodes.OK).send({ "change": quantityChange });
     }
 
     /**
-   * @param {Array<Currency>} money - This attribute has the information on the payment values and quantities
-   * @return {Integer} - the total value of the clients payment
-   */
+    * The method to get the total money enter by the user.
+    * @param {Array<Currency>} money - This attribute has the information on the payment values and quantities
+    * @return {Integer} - the total value of the clients payment
+    */
     getTotalMoney(money) {
         const reducer = (accumulator, currentValue) => accumulator + currentValue;
         return money.map(data => data.value * data.quantity).reduce(reducer);
     }
 
     /**
-   * @param {Array<Integer>} totalValuesInCurrency - The list of values un the ATM
-   * @return {Array<Integer>} - the total value of the clients payment
-   */
+    * The method calculates the quantity of money to give the user.
+    * @param {Array<Integer>} totalValuesInCurrency - The list of values un the ATM
+    * @return {Array<Integer>} - the total value of the clients payment
+    */
     greedyMoneyChange(totalValuesInCurrency, change, result) {
         if (change <= 0) {
             return result;
@@ -107,10 +143,11 @@ class CurrencyController {
     }
 
     /**
-   * @param {Array<Integer>} valueArray - This attribute has the information on the payment values and quantities
-   * @param {Array<Integer>} money - the total value of the clients payment
-   * @return {Void}
-   */
+    * The method that updates the currency for the payment.
+    * @param {Array<Integer>} valueArray - This attribute has the information on the payment values and quantities
+    * @param {Array<Integer>} money - the total value of the clients payment
+    * @return {Void}
+    */
     async currencyAdjustment(valueArray, money) {
         const duplicates = _.groupBy(valueArray, function (n) { return n });
         const entries = Object.entries(duplicates)
@@ -128,11 +165,12 @@ class CurrencyController {
     }
 
     /**
-   * @param {Integer} currencyQuantity - The current quantity in the ATM
-   * @param {Integer} discountQuantity - The quantity to discount to the ATM
-   * @param {Integer} countQuantity - The quantity to add to the ATM
-   * @return {Integer}
-   */
+    * The method to get the quantity total to payment.
+    * @param {Integer} currencyQuantity - The current quantity in the ATM
+    * @param {Integer} discountQuantity - The quantity to discount to the ATM
+    * @param {Integer} countQuantity - The quantity to add to the ATM
+    * @return {Integer}
+    */
     getAjustmentQuantity(currencyQuantity, discountQuantity, countQuantity) {
         return (currencyQuantity - discountQuantity) + countQuantity
     }

@@ -8,7 +8,8 @@ class CurrencyLogSchema extends Schema {
     this.create('currency_logs', (table) => {
     table.increments()
     table.string('operation').notNullable()
-    table.json('info').notNullable()
+    table.json('input').notNullable()
+    table.json('before').notNullable()
     table.timestamps()
     })
   }
